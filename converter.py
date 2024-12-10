@@ -3,29 +3,19 @@ import re
 import json
 from datetime import datetime
 
-def convert_data(df):
-
+def convert_bay_data(df):
     sheet_name = list(df.keys())[-1]
     last_tab = df[sheet_name]
-
     converted_data = []
-
     for index, row in last_tab.iterrows():
-        # print(row["valuation_date"])
- 
         empty_columns_count = sum(row.isnull())
-
         if empty_columns_count >= 4:
             continue  
-
-  
         account_id = row['account_id']
         if account_id == 0:
             continue
         capital_movements = row["capital_movements"]
         capital_movements_float = float(capital_movements)
-        # if capital_movements:
-
         if capital_movements_float < 1:
             capital_movements = '0'
         else:
@@ -41,14 +31,12 @@ def convert_data(df):
         comp_name = row['comp_name']
         NAV = str(row['NAV']).replace(',', '')
 
-        
         if isinstance(description, str):
             description = re.sub("'", "''", description)
 
         if isinstance(comp_name, str):
             comp_name = re.sub("'", "''", comp_name)
 
-        
         datapair = {"account_id": account_id,
                     "description": description,
                     "valuation_date": valuation_date,
@@ -61,16 +49,13 @@ def convert_data(df):
                     "sys_calc_pf": sys_calc_pf,
                     "comp_name": comp_name,
                     "NAV": NAV
-                   }
+                }
         converted_data.append(datapair)
-       
-    return converted_data
+    converted_data1 = []
+    output_data = converted_data
+    for i in output_data:
+        cleaned_json = {key.strip(): value.strip() if isinstance(value, str) else value for key, value in i.items()}
+        converted_data1.append(cleaned_json)
+    return converted_data1
 
 
-excel_file_path = "excel/07. Fund I - CSV Import.xlsx"
-df = pd.read_excel(excel_file_path, sheet_name=None)
-# cols = pd.read_excel(excel_file_path, sheet_name=None, nrows=0).columns
-# print (df, "---------------------------")
-output_data = convert_data(df)
-
-print(json.dumps(output_data))

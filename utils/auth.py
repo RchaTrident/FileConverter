@@ -4,27 +4,13 @@ import requests
 import json
 import streamlit.components.v1 as components
 
-auth = {
-    "prod": {
-        "pId": st.secrets["FINICITY_PARTNER_ID"],
-        "secret": st.secrets["FINICITY_SECRET"],
-        "key": st.secrets["FINICITY_KEY"]
-    },
-    "headers": {
-        'Finicity-App-Key': st.secrets["FINICITY_KEY"],
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Finicity-App-Token': 'AwardyN4OiUHD6oNJleQ'
-    },
-    "url": st.secrets["FINICITY_URL"]
-}
 
 user_roles = {
     "FINICITYTTUS": {
         "tables": ["ALL"],
         "customers": "ALL"
     },
-    "TRIDENT_LEE": {
+    "TRIDENT_LORENZ": {
         "tables": ["TESTINGAI.TESTINGAISCHEMA.TIOGA"],
         "customers": ["Lee's Customer"]
     }
@@ -69,36 +55,19 @@ def login_page():
     """, height=0)
     
     if st.button("Login"):
+        print(username, password)
         if not username or not password:
             st.error("Please enter both username and password")
         elif authenticate(username, password):
             st.session_state['logged_in'] = True
             st.success("Logged in successfully!")
-            st.rerun()  # Use st.rerun instead of st.experimental_rerun
+            st.rerun()
         else:
             st.error("Invalid credentials")
 
 def logout():
     st.session_state['logged_in'] = False
     st.rerun() 
-
-def get_token():
-    body = {
-        "partnerId": auth["prod"]["pId"],
-        "partnerSecret": auth["prod"]["secret"]
-    } 
-    session = requests.Session()
-    response = session.post(
-        url=f"{auth['url']}/aggregation/v2/partners/authentication",
-        json=body,
-        headers=auth['headers'],
-    )
-    if response.status_code == 200:
-        auth['headers']['Finicity-App-Token'] = response.json()['token']
-        return auth['headers']['Finicity-App-Token']
-    else:
-        st.error(f"Failed to get token. Status code: {response.status_code}, Response: {response.text}")
-        return None
 
 def display_content():
     user_role = st.session_state.get('user_role')
